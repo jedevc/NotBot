@@ -4,11 +4,17 @@ import notifybot
 import sys
 
 def main():
-    if len(sys.argv) > 1:
-        bot = notifybot.NotifyBot(sys.argv[1])
+    if len(sys.argv) >= 2:
+        bot = None
+        
+        if len(sys.argv) == 2:
+            bot = notifybot.NotifyBot(roomname=sys.argv[1])
+        elif len(sys.argv) >= 3:
+            bot = notifybot.NotifyBot(roomname=sys.argv[1], password=sys.argv[2])
+        
         bot.run()
     else:
-        print("Must select room for bot to enter.")
+        print("Invalid arguments.")
 
 if __name__ == "__main__":
     main()

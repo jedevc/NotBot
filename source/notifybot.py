@@ -47,7 +47,7 @@ class NotifyBot(basebot.Bot):
             for user in people:
                 self.add_notification(user, info["sender"], notification)
                 
-        #Handle a view request
+        #Handle sending messages
         elif info["sender"] in self.messages:
             user = info["sender"]
             mid = info["id"]
