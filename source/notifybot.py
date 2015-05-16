@@ -3,7 +3,7 @@ import basebot
 class NotifyBot(basebot.Bot):
     def __init__(self, roomname, password=None):
         super().__init__(roomname, password)
-        self.nickname = "NotifyBot"
+        self.nickname = "NotBot"
         
         self.messages = dict()
         
@@ -14,7 +14,7 @@ class NotifyBot(basebot.Bot):
         if user not in self.messages:
             self.messages[user] = []
             
-        self.messages[user].append("To: @" + user + ", From: @" + sender + ", Content: " + message)
+        self.messages[user].append("> " + message + " < from " + sender + ".")
         
     def get_notifications(self, user):
         """
@@ -30,8 +30,12 @@ class NotifyBot(basebot.Bot):
     def handle_chat(self, info, message):
         parts = info["content"].split()
         
+        #Handle ping
+        if parts[0] == "!ping":
+            self.send_chat("Pong!", info["id"])
+        
         #Handle a notification request.
-        if parts[0] == "!notify":
+        elif parts[0] == "!notify":
             people = []
             people_over = False
             
@@ -47,11 +51,11 @@ class NotifyBot(basebot.Bot):
             for user in people:
                 self.add_notification(user, info["sender"], notification)
                 
+            self.send_chat("Message will be delivered to " + " ".join(people) + ".")
+                
         #Handle sending messages
         elif info["sender"] in self.messages:
-            user = info["sender"]
-            mid = info["id"]
-            messages = self.get_notifications(user)
+            messages = self.get_notifications(info["sender"])
 
             for message in messages:
-                self.send_chat(">>> " + message, mid)
+                self.send_chat(">>> " + message, info["id"])
