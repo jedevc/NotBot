@@ -14,7 +14,7 @@ class NotifyBot(basebot.Bot):
         if user not in self.messages:
             self.messages[user] = []
             
-        self.messages[user].append("> " + message + " < from " + sender + ".")
+        self.messages[user].append("[" + sender + "] " + message)
         
     def get_notifications(self, user):
         """
@@ -47,15 +47,18 @@ class NotifyBot(basebot.Bot):
                     people_over = True
                     words.append(i)
                     
+            if len(people) == 0:
+                return
+                    
             notification = " ".join(words)
             for user in people:
                 self.add_notification(user, info["sender"], notification)
                 
-            self.send_chat("Message will be delivered to " + " ".join(people) + ".")
+            self.send_chat("Message will be delivered to " + " ".join(people) + ".", info["id"])
                 
         #Handle sending messages
         elif info["sender"] in self.messages:
             messages = self.get_notifications(info["sender"])
 
             for message in messages:
-                self.send_chat(">>> " + message, info["id"])
+                self.send_chat(message, info["id"])
