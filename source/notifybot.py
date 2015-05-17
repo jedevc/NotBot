@@ -1,12 +1,14 @@
 import euphoria
 
+import time
+
 class NotifyBot(euphoria.chat_component.ChatComponent):
     def __init__(self, owner):
         super().__init__(owner)
 
         self.messages = dict()
         
-    def add_notification(self, user, sender, message):
+    def add_notification(self, user, sender, message, timestamp):
         """
         Add notification for a certain user.
         """
@@ -14,12 +16,13 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         if user not in self.messages:
             self.messages[user] = []
 
-        self.messages[user].append("[" + sender + "] " + message)
+        self.messages[user].append((sender, message, timestamp))
         
     def get_notifications(self, user):
         """
         Clear and return all messages for a certain user.
         """
+        
         if user in self.messages:
             ms = self.messages[user]
             self.messages[user] = []
@@ -55,7 +58,7 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
                     
             notification = " ".join(words)
             for user in people:
-                self.add_notification(user, info["sender"]["name"], notification)
+                self.add_notification(user, info["sender"]["name"], notification, int(info["time"]))
                 
             self.send_chat("Message will be delivered to @" + " @".join(people) + ".", info["id"])
                 
@@ -65,4 +68,6 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
             messages = self.get_notifications(sender)
 
             for message in messages:
-                self.send_chat(message, info["id"])
+                sender, content, timestamp = message
+                tosend = "[" + sender + ", " + str(int(time.time() - timestamp)) + " seconds ago] " + content
+                self.send_chat(tosend, info["id"])
