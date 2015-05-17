@@ -63,11 +63,11 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
             self.send_chat("Message will be delivered to @" + " @".join(people) + ".", info["id"])
                 
         #Handle sending messages
-        sender = info["sender"]["name"].replace(" ", "")
+        sender = info["sender"]["name"].strip().replace(" ", "")
         if sender in self.messages:
             messages = self.get_notifications(sender)
 
             for message in messages:
                 sender, content, timestamp = message
-                tosend = "[" + sender + ", " + str(int(time.time() - timestamp)) + " seconds ago] " + content
+                tosend = "[" + sender + "] " + content
                 self.send_chat(tosend, info["id"])
