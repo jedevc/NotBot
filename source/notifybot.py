@@ -53,7 +53,8 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
 
             for message in messages:
                 sender, content, timestamp = message
-                tosend = "[" + sender + "] " + content
+                tosend = "[" + sender + ", " + str(int(time.time()) - 
+                                        timestamp) + " seconds ago] " + content
                 self.send_chat(tosend, info["id"])
         
         #Split the message into parts
