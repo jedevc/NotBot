@@ -1,19 +1,19 @@
-import basebot
+import euphoria
 
-class NotifyBot(basebot.Bot):
-    def __init__(self, roomname, password=None):
-        super().__init__(roomname, password)
-        self.nickname = "NotBot"
-        
+class NotifyBot(euphoria.chat_component.ChatComponent):
+    def __init__(self, owner):
+        super().__init__(owner)
+
         self.messages = dict()
         
     def add_notification(self, user, sender, message):
         """
         Add notification for a certain user.
         """
+        
         if user not in self.messages:
             self.messages[user] = []
-            
+
         self.messages[user].append("[" + sender + "] " + message)
         
     def get_notifications(self, user):
@@ -27,7 +27,7 @@ class NotifyBot(basebot.Bot):
         
         return []
                 
-    def handle_chat(self, info, message):
+    def handle_chat(self, info):
         parts = info["content"].split()
         if len(parts) == 0:
             return
@@ -41,6 +41,7 @@ class NotifyBot(basebot.Bot):
             people = []
             people_over = False
             
+            #Divide the people and the message into two parts.
             words = []
             for i in parts[1:]:
                 if i[0] == '@' and not people_over:
@@ -54,12 +55,12 @@ class NotifyBot(basebot.Bot):
                     
             notification = " ".join(words)
             for user in people:
-                self.add_notification(user, info["sender"], notification)
+                self.add_notification(user, info["sender"]["name"], notification)
                 
             self.send_chat("Message will be delivered to @" + " @".join(people) + ".", info["id"])
                 
         #Handle sending messages
-        sender = info["sender"].replace(" ", "")
+        sender = info["sender"]["name"].replace(" ", "")
         if sender in self.messages:
             messages = self.get_notifications(sender)
 
