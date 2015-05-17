@@ -32,6 +32,18 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         return []
                 
     def handle_chat(self, info):
+        #Handle sending messages
+        sender = "".join(info["sender"]["name"].split())
+        sender = "".join([x for x in sender if x in string.printable])
+        if sender in self.messages:
+            messages = self.get_notifications(sender)
+
+            for message in messages:
+                sender, content, timestamp = message
+                tosend = "[" + sender + "] " + content
+                self.send_chat(tosend, info["id"])
+        
+        #Split the message into parts
         parts = info["content"].split()
         if len(parts) == 0:
             return
@@ -54,23 +66,15 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
                     people_over = True
                     words.append(i)
                     
-            if len(people) == 0:
+            if len(people) == 0:  #Make sure that people will receive the message
                 return
                     
+            #Send the message to everyone
             notification = " ".join(words)
-            for user in people:
-                receiver = "".join([x for x in user if x in string.printable])
-                self.add_notification(receiver, info["sender"]["name"], notification, int(info["time"]))
+            notification = notification.strip()
+            if len(notification) != 0:  #Make sure that the notification exists
+                for user in people:
+                    receiver = "".join([x for x in user if x in string.printable])
+                    self.add_notification(receiver, info["sender"]["name"], notification, int(info["time"]))
                 
-            self.send_chat("Message will be delivered to @" + " @".join(people) + ".", info["id"])
-
-        #Handle sending messages
-        sender = "".join(info["sender"]["name"].split())
-        sender = "".join([x for x in sender if x in string.printable])
-        if sender in self.messages:
-            messages = self.get_notifications(sender)
-
-            for message in messages:
-                sender, content, timestamp = message
-                tosend = "[" + sender + "] " + content
-                self.send_chat(tosend, info["id"])
+                self.send_chat("Message will be delivered to @" + " @".join(people) + ".", info["id"])
