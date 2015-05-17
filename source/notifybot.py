@@ -29,6 +29,8 @@ class NotifyBot(basebot.Bot):
                 
     def handle_chat(self, info, message):
         parts = info["content"].split()
+        if len(parts) == 0:
+            return
         
         #Handle ping
         if parts[0] == "!ping":
@@ -54,11 +56,12 @@ class NotifyBot(basebot.Bot):
             for user in people:
                 self.add_notification(user, info["sender"], notification)
                 
-            self.send_chat("Message will be delivered to " + " ".join(people) + ".", info["id"])
+            self.send_chat("Message will be delivered to @" + " @".join(people) + ".", info["id"])
                 
         #Handle sending messages
-        elif info["sender"] in self.messages:
-            messages = self.get_notifications(info["sender"])
+        sender = info["sender"].replace(" ", "")
+        if sender in self.messages:
+            messages = self.get_notifications(sender)
 
             for message in messages:
                 self.send_chat(message, info["id"])
