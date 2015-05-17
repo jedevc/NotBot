@@ -14,11 +14,8 @@ def main():
             bot = euphoria.room.Room(roomname=sys.argv[1], password=sys.argv[2])
         
         bot.add_component("notify", notifybot.NotifyBot(bot))
-        
-        bot.join("NotBot")
-        
-        bot.ready()
-        bot.run()
+
+        bot.run("NotBot")
     else:
         print("Invalid arguments.")
 
