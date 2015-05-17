@@ -1,6 +1,7 @@
 import euphoria
 
 import time
+import string
 
 class NotifyBot(euphoria.chat_component.ChatComponent):
     def __init__(self, owner):
@@ -58,12 +59,14 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
                     
             notification = " ".join(words)
             for user in people:
-                self.add_notification(user, info["sender"]["name"], notification, int(info["time"]))
+                receiver = "".join([x for x in user if x in string.printable])
+                self.add_notification(receiver, info["sender"]["name"], notification, int(info["time"]))
                 
             self.send_chat("Message will be delivered to @" + " @".join(people) + ".", info["id"])
-                
+
         #Handle sending messages
-        sender = info["sender"]["name"].strip().replace(" ", "")
+        sender = "".join(info["sender"]["name"].split())
+        sender = "".join([x for x in sender if x in string.printable])
         if sender in self.messages:
             messages = self.get_notifications(sender)
 
