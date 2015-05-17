@@ -3,6 +3,20 @@ import euphoria
 import time
 import string
 
+def filter_nick(name):
+    """
+    filter_nick(name) -> String
+    
+    Process the name and get rid of all whitespace, invisible characters and
+    make it all lower case.
+    """
+    
+    ret = "".join(name.split())
+    ret = "".join([x for x in ret if x in string.printable])
+    ret = ret.lower()
+    
+    return ret
+
 class NotifyBot(euphoria.chat_component.ChatComponent):
     def __init__(self, owner):
         super().__init__(owner)
@@ -32,9 +46,8 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         return []
                 
     def handle_chat(self, info):
-        #Handle sending messages
-        sender = "".join(info["sender"]["name"].split())
-        sender = "".join([x for x in sender if x in string.printable])
+        #Handle sending messages if the user speaks
+        sender = filter_nick(info["sender"]["name"])
         if sender in self.messages:
             messages = self.get_notifications(sender)
 
@@ -61,12 +74,14 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
             words = []
             for i in parts[1:]:
                 if i[0] == '@' and not people_over:
-                    people.append(i.strip('@'))
+                    person = i.strip('@')
+                    person = filter_nick(person)
+                    people.append(person)
                 else:
                     people_over = True
                     words.append(i)
                     
-            if len(people) == 0:  #Make sure that people will receive the message
+            if len(people) == 0: #Make sure that people will receive the message
                 return
                     
             #Send the message to everyone
@@ -74,7 +89,8 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
             notification = notification.strip()
             if len(notification) != 0:  #Make sure that the notification exists
                 for user in people:
-                    receiver = "".join([x for x in user if x in string.printable])
-                    self.add_notification(receiver, info["sender"]["name"], notification, int(info["time"]))
+                    self.add_notification(user, info["sender"]["name"], 
+                                            notification, int(info["time"]))
                 
-                self.send_chat("Message will be delivered to @" + " @".join(people) + ".", info["id"])
+                self.send_chat("Message will be delivered to @" + 
+                                " @".join(people) + ".", info["id"])
