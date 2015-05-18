@@ -13,6 +13,7 @@ def main():
         elif len(sys.argv) >= 3:
             bot = euphoria.room.Room(roomname=sys.argv[1], password=sys.argv[2])
         
+        bot.add_component("ping", euphoria.ping_component.PingComponent(bot))
         bot.add_component("notify", notifybot.NotifyBot(bot))
 
         bot.run("NotBot")
