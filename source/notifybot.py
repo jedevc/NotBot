@@ -31,6 +31,8 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         
     def add_notification(self, user, sender, message, timestamp):
         """
+        add_notification(user, sender, message, timestamp) -> None
+        
         Add notification for a certain user.
         """
         
@@ -41,6 +43,8 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         
     def get_notifications(self, user):
         """
+        get_notifications(user) -> None
+        
         Clear and return all messages for a certain user.
         """
         
@@ -50,60 +54,67 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
             return ms
         
         return []
+    
+    def send_notifications(self, user, info):
+        """
+        send_notifications(user, info) -> None
+        
+        Send all the messages queued by the bot.
+        """
+        
+        messages = self.get_notifications(user)
+
+        for message in messages:
+            user, content, timestamp = message
+            tosend = "[" + user + ", " + extract_time(int(time.time()) - 
+                        timestamp) + " ago] " + content
+            self.send_chat(tosend, info["id"])
                 
+    def parse_notify(self, info, parts):
+        """
+        parse_notify(info, parts) -> None
+        
+        Take the text and try to send it to the specified user.
+        """
+        
+        #Divide the people and the message into two parts.
+        receiver = parts[1]
+        notification = " ".join(parts[2:])
+        
+        #No receiver or no message
+        if receiver[0] != "@" or len(notification) == 0:
+            return
+        
+        #Send the message to the receiver
+        to = receiver[1:]
+        to = filter_nick(to)
+        self.add_notification(to, info["sender"]["name"], notification, 
+                                int(info["time"]))
+        self.send_chat("Message will be delivered to %s." % receiver, 
+                        info["id"])
+
     def handle_chat(self, info):
         #Handle sending messages if the user speaks
-        sender = filter_nick(info["sender"]["name"])
-        if sender in self.messages:
-            messages = self.get_notifications(sender)
-
-            for message in messages:
-                sender, content, timestamp = message
-                tosend = "[" + sender + ", " + extract_time(int(time.time()) - 
-                                        timestamp) + " ago] " + content
-                self.send_chat(tosend, info["id"])
+        user = filter_nick(info["sender"]["name"])
+        if user in self.messages:
+            self.send_notifications(user, info)
         
         #Now, begin proccessing the message
-        #Split the message into parts
+        #Split the message into parts and work out the command
         parts = info["content"].split()
         if len(parts) == 0:
             return
+        command = parts[0]
         
         #Handle ping
-        if parts[0] == "!ping":
+        if command == "!ping":
             self.send_chat("Pong!", info["id"])
             
         #Handle help
-        if parts[0] == "!help" and self.owner.nickname in info["content"]:
+        if command == "!help" and self.owner.nickname in info["content"]:
             self.send_chat("Use !notify to send messages to other people who"
-                                    "are currently unavailable.", info["id"])
+                            "are currently unavailable.", info["id"])
         
         #Handle a notification request.
-        elif parts[0] == "!notify":
-            people = []
-            people_over = False
-            
-            #Divide the people and the message into two parts.
-            words = []
-            for p in parts[1:]:
-                if p[0] == '@' and not people_over:
-                    person = p[1:]
-                    person = filter_nick(person)
-                    people.append(person)
-                else:
-                    people_over = True
-                    words.append(p)
-                    
-            if len(people) == 0: #Make sure that people will receive the message
-                return
-                    
-            #Send the message to everyone
-            notification = " ".join(words)
-            notification = notification.strip()
-            if len(notification) != 0:  #Make sure that the notification exists
-                for user in people:
-                    self.add_notification(user, info["sender"]["name"], 
-                                            notification, int(info["time"]))
-                
-                self.send_chat("Message will be delivered to @" + 
-                                " @".join(people) + ".", info["id"])
+        elif command == "!notify":
+            self.parse_notify(info, parts)
