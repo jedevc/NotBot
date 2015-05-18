@@ -112,7 +112,7 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
             
         #Handle help
         if command == "!help" and self.owner.nickname in info["content"]:
-            self.send_chat("Use !notify to send messages to other people who"
+            self.send_chat("Use !notify to send messages to other people who "
                             "are currently unavailable.", info["id"])
         
         #Handle a notification request.
