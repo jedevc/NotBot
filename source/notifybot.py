@@ -17,6 +17,12 @@ def filter_nick(name):
     
     return ret
 
+def extract_time(seconds):
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    
+    return "%dh %dm %ds" % (h, m, s)
+
 class NotifyBot(euphoria.chat_component.ChatComponent):
     def __init__(self, owner):
         super().__init__(owner)
@@ -53,10 +59,11 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
 
             for message in messages:
                 sender, content, timestamp = message
-                tosend = "[" + sender + ", " + str(int(time.time()) - 
-                                        timestamp) + " seconds ago] " + content
+                tosend = "[" + sender + ", " + extract_time(int(time.time()) - 
+                                        timestamp) + " ago] " + content
                 self.send_chat(tosend, info["id"])
         
+        #Now, begin proccessing the message
         #Split the message into parts
         parts = info["content"].split()
         if len(parts) == 0:
@@ -65,6 +72,11 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         #Handle ping
         if parts[0] == "!ping":
             self.send_chat("Pong!", info["id"])
+            
+        #Handle help
+        if parts[0] == "!help" and self.owner.nickname in info["content"]:
+            self.send_chat("Use !notify to send messages to other people who"
+                                    "are currently unavailable.", info["id"])
         
         #Handle a notification request.
         elif parts[0] == "!notify":
@@ -73,14 +85,14 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
             
             #Divide the people and the message into two parts.
             words = []
-            for i in parts[1:]:
-                if i[0] == '@' and not people_over:
-                    person = i.strip('@')
+            for p in parts[1:]:
+                if p[0] == '@' and not people_over:
+                    person = p[1:]
                     person = filter_nick(person)
                     people.append(person)
                 else:
                     people_over = True
-                    words.append(i)
+                    words.append(p)
                     
             if len(people) == 0: #Make sure that people will receive the message
                 return
