@@ -1,7 +1,7 @@
 import euphoria
 
 import time
-import string
+import unicodedata
 
 def filter_nick(name):
     """
@@ -11,8 +11,9 @@ def filter_nick(name):
     make it all lower case.
     """
     
-    ret = "".join(name.split())
-    ret = "".join([x for x in ret if x in string.printable])
+    ret = "".join(c for c in name if unicodedata.category(c)[0] not in ["C", "Z"])
+    
+    ret = "".join(ret.split())
     ret = ret.lower()
     
     return ret
