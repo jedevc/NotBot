@@ -47,6 +47,12 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         self.dump_thread.start()
         
     def regular_dump(self, delay, filename):
+        """
+        regular_dump(delay, filename) -> None
+        
+        Regularly dump to a file so that messages can be recovered if needed.
+        """
+        
         last_dump = time.time()
         while not self.threadstop:
             if time.time() - last_dump > delay:
