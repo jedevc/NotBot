@@ -57,6 +57,8 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         while not self.threadstop:
             if time.time() - last_dump > delay:
                 self.dump_messages(filename)
+
+            time.sleep(3)  #Calm CPU usage
     
     def dump_messages(self, filename):
         """
