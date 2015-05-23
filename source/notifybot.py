@@ -2,6 +2,7 @@ import euphoria
 
 import time
 import unicodedata
+import threading
 
 def filter_nick(name):
     """
@@ -19,16 +20,68 @@ def filter_nick(name):
     return ret
 
 def extract_time(seconds):
+    """
+    extract_time(seconds) -> String
+    
+    Turn the time in seconds to a string containing the time formatted into
+    hours and minutes.
+    """
+    
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     
     return "%dh %dm %ds" % (h, m, s)
 
 class NotifyBot(euphoria.chat_component.ChatComponent):
-    def __init__(self, owner):
+    def __init__(self, owner, delay, dumpfile):
         super().__init__(owner)
 
         self.messages = dict()
+        
+        self.recover_messages(dumpfile)
+        
+        #Threading crap
+        self.dump_thread = threading.Thread(target=self.regular_dump, 
+                                            args=[delay, dumpfile])
+        self.threadstop = False
+        self.dump_thread.start()
+        
+    def regular_dump(self, delay, filename):
+        last_dump = time.time()
+        while not self.threadstop:
+            if time.time() - last_dump > delay:
+                self.dump_messages(filename)
+    
+    def dump_messages(self, filename):
+        """
+        dump_messages(filename) -> None
+        
+        Dump all the messages you have obtained in a file to be read in later.
+        """
+        
+        with open(filename, 'w') as f:
+            for user in self.messages:
+                for i in self.messages[user]:
+                    sender, message, timestamp = i
+                    
+                    f.write(str((user, sender, message, timestamp)) + "\n")
+        
+    def recover_messages(self, filename):
+        """
+        recover_messages(filename) -> None
+        
+        Recover all the messages that you previously dumped in a file
+        """
+        
+        nots = None
+        with open(filename) as f:
+            nots = f.read().split('\n')
+
+        for n in nots:
+            if len(n.strip()) != 0:
+                user, sender, message, timestamp = eval(n)
+                
+                self.add_notification(user, sender, message, timestamp)
         
     def add_notification(self, user, sender, message, timestamp):
         """
@@ -119,3 +172,7 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
         #Handle a notification request.
         elif command == "!notify":
             self.parse_notify(info, parts)
+            
+    def quit(self):
+        self.threadstop = True
+        self.dump_thread.join()

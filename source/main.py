@@ -14,7 +14,7 @@ def main():
             bot = euphoria.room.Room(roomname=sys.argv[1], password=sys.argv[2])
         
         bot.add_component(euphoria.ping_component.PingComponent(bot))
-        bot.add_component(notifybot.NotifyBot(bot))
+        bot.add_component(notifybot.NotifyBot(bot, 20, "message_dump.txt"))
 
         bot.run("NotBot")
     else:
