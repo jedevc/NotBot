@@ -32,12 +32,12 @@ def extract_time(seconds):
     
     return "%dh %dm %ds" % (h, m, s)
 
-class NotifyBot(euphoria.chat_component.ChatComponent):
-    def __init__(self, owner, delay, dumpfile):
-        super().__init__(owner)
+class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
+    def __init__(self, dumpfile, delay, roomname, password=None):
+        super().__init__(roomname, password)
+        self.nickname = "NotBot"
 
         self.messages = dict()
-        
         self.recover_messages(dumpfile)
         
         #Threading crap
@@ -173,7 +173,7 @@ class NotifyBot(euphoria.chat_component.ChatComponent):
             self.send_chat("Pong!", info["id"])
             
         #Handle help
-        if command == "!help" and self.owner.nickname in info["content"]:
+        if command == "!help" and self.nickname in info["content"]:
             self.send_chat("Use !notify to send messages to other people who "
                             "are currently unavailable.", info["id"])
         

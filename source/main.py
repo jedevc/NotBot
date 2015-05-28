@@ -1,6 +1,5 @@
 #A bot that notifies people.
 
-import euphoria
 import notifybot
 import sys
 
@@ -9,14 +8,14 @@ def main():
         
         bot = None
         if len(sys.argv) == 2:
-            bot = euphoria.room.Room(roomname=sys.argv[1])
+            bot = notifybot.NotifyBot(dumpfile="message_dump.txt", delay=60, 
+                                      roomname=sys.argv[1])
         elif len(sys.argv) >= 3:
-            bot = euphoria.room.Room(roomname=sys.argv[1], password=sys.argv[2])
+            bot = notifybot.NotifyBot(dumpfile="message_dump.txt", delay=60,
+                                      roomname=sys.argv[1], 
+                                      password=sys.argv[2])
         
-        bot.add_component(euphoria.ping_component.PingComponent(bot))
-        bot.add_component(notifybot.NotifyBot(bot, 20, "message_dump.txt"))
-
-        bot.run("NotBot")
+        bot.run()
     else:
         print("Invalid arguments.")
 
