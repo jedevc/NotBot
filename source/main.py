@@ -1,6 +1,8 @@
 #A bot that notifies people.
 
 import notifybot
+import euphoria as eu
+
 import sys
 
 def main():
@@ -14,8 +16,8 @@ def main():
             bot = notifybot.NotifyBot(dumpfile="message_dump.txt", delay=60,
                                       roomname=sys.argv[1], 
                                       password=sys.argv[2])
-        
-        bot.run()
+            
+        eu.executable.start(bot)
     else:
         print("Invalid arguments.")
 
