@@ -57,6 +57,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         while not self.threadstop:
             if time.time() - last_dump > delay:
                 self.dump_messages(filename)
+                last_dump = time.time()
 
             time.sleep(3)  #Calm CPU usage
     
@@ -82,8 +83,11 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         """
         
         nots = None
-        with open(filename) as f:
-            nots = f.read().split('\n')
+        try:
+            with open(filename) as f:
+                nots = f.read().split('\n')
+        except FileNotFoundError:
+            return
 
         for n in nots:
             if len(n.strip()) != 0:
@@ -184,3 +188,5 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
     def quit(self):
         self.threadstop = True
         self.dump_thread.join()
+        
+        super().quit()
