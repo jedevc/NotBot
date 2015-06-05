@@ -30,7 +30,7 @@ def extract_time(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     
-    if (h == 0 && m == 0):
+    if (h == 0 and m == 0):
         return "%ds" % s
     elif (h == 0):
         return "%dm %ds" % (m, s)
