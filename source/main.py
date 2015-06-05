@@ -3,7 +3,8 @@
 import multiroom
 import euphoria as eu
 
-rooms = {"test": None, "testing": None}
+rooms = {"xkcd": None,
+         "bots": None}
 
 def main():
     notifiers = multiroom.MultiRoom(rooms)

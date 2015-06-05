@@ -30,7 +30,12 @@ def extract_time(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     
-    return "%dh %dm %ds" % (h, m, s)
+    if (h == 0 && m == 0):
+        return "%ds" % s
+    elif (h == 0):
+        return "%dm %ds" % (m, s)
+    else:
+        return "%dh %dm %ds" % (h, m, s)
 
 class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
     def __init__(self, messages, dumpdelay, roomname, password=None):
@@ -116,7 +121,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             self.send_chat("Pong!", info["id"])
             
         #Handle help
-        if command == "!help" and self.nickname in info["content"]:
+        elif command == "!help" and self.nickname in info["content"]:
             self.send_chat("Use !notify to send messages to other people who "
                             "are currently unavailable.", info["id"])
         
