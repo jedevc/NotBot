@@ -33,22 +33,21 @@ def extract_time(seconds):
     return "%dh %dm %ds" % (h, m, s)
 
 class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
-    def __init__(self, dumpfile, delay, roomname, password=None):
+    def __init__(self, messages, dumpdelay, roomname, password=None):
         super().__init__(roomname, password)
         self.nickname = "NotBot"
 
-        self.messages = dict()
-        self.recover_messages(dumpfile)
+        self.messages = messages
         
         #Threading crap
         self.dump_thread = threading.Thread(target=self.regular_dump, 
-                                            args=[delay, dumpfile])
+                                            args=[dumpdelay])
         self.threadstop = False
         self.dump_thread.start()
         
-    def regular_dump(self, delay, filename):
+    def regular_dump(self, delay):
         """
-        regular_dump(delay, filename) -> None
+        regular_dump(delay) -> None
         
         Regularly dump to a file so that messages can be recovered if needed.
         """
@@ -56,70 +55,10 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         last_dump = time.time()
         while not self.threadstop:
             if time.time() - last_dump > delay:
-                self.dump_messages(filename)
+                self.messages.dump_notifications()
                 last_dump = time.time()
 
             time.sleep(3)  #Calm CPU usage
-    
-    def dump_messages(self, filename):
-        """
-        dump_messages(filename) -> None
-        
-        Dump all the messages you have obtained in a file to be read in later.
-        """
-        
-        with open(filename, 'w') as f:
-            for user in self.messages:
-                for i in self.messages[user]:
-                    sender, message, timestamp = i
-                    
-                    f.write(str((user, sender, message, timestamp)) + "\n")
-        
-    def recover_messages(self, filename):
-        """
-        recover_messages(filename) -> None
-        
-        Recover all the messages that you previously dumped in a file
-        """
-        
-        nots = None
-        try:
-            with open(filename) as f:
-                nots = f.read().split('\n')
-        except FileNotFoundError:
-            return
-
-        for n in nots:
-            if len(n.strip()) != 0:
-                user, sender, message, timestamp = eval(n)
-                
-                self.add_notification(user, sender, message, timestamp)
-        
-    def add_notification(self, user, sender, message, timestamp):
-        """
-        add_notification(user, sender, message, timestamp) -> None
-        
-        Add notification for a certain user.
-        """
-        
-        if user not in self.messages:
-            self.messages[user] = []
-
-        self.messages[user].append((sender, message, timestamp))
-        
-    def get_notifications(self, user):
-        """
-        get_notifications(user) -> None
-        
-        Clear and return all messages for a certain user.
-        """
-        
-        if user in self.messages:
-            ms = self.messages[user]
-            self.messages[user] = []
-            return ms
-        
-        return []
     
     def send_notifications(self, user, info):
         """
@@ -128,7 +67,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         Send all the messages queued by the bot.
         """
         
-        messages = self.get_notifications(user)
+        messages = self.messages.get_notifications(user)
 
         for message in messages:
             user, content, timestamp = message
@@ -154,7 +93,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         #Send the message to the receiver
         to = receiver[1:]
         to = filter_nick(to)
-        self.add_notification(to, info["sender"]["name"], notification, 
+        self.messages.add_notification(to, info["sender"]["name"], notification, 
                                 int(info["time"]))
         self.send_chat("Message will be delivered to %s." % receiver, 
                         info["id"])
@@ -162,7 +101,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
     def handle_chat(self, info):
         #Handle sending messages if the user speaks
         user = filter_nick(info["sender"]["name"])
-        if user in self.messages:
+        if self.messages.has_notifications(user):
             self.send_notifications(user, info)
         
         #Now, begin proccessing the message
