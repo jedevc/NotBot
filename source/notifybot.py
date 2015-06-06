@@ -123,7 +123,10 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         #Handle help
         elif command == "!help" and self.nickname in info["content"]:
             self.send_chat("Use !notify to send messages to other people who "
-                            "are currently unavailable.", info["id"])
+                            "are currently unavailable.\n\n"
+                            "Want to have an instance of @NotBot in another "
+                            "room? Just send me (@jedevc) a !notify.", 
+                            info["id"])
         
         #Handle a notification request.
         elif command == "!notify":
