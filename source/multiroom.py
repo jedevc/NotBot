@@ -12,15 +12,3 @@ class MultiRoom(euphoria.execgroup.ExecGroup):
 
         for i in rooms:
             self.add(notifybot.NotifyBot(notifies, 2 * 60, i, rooms[i]))
-
-    def run(self):
-        print("Starting...")
-        
-        super().run()
-        
-    def quit(self):
-        print("Quitting...")
-        
-        super().quit()
-        
-        print("Quit.")
