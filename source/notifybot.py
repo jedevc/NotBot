@@ -42,6 +42,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         super().__init__(roomname, password)
         self.nickname = "NotBot"
 
+        self.groups = dict()
         self.messages = messages
         
         #Threading crap
@@ -79,7 +80,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             tosend = "[" + user + ", " + extract_time(int(time.time()) - 
                         timestamp) + " ago] " + content
             self.send_chat(tosend, info["id"])
-                
+
     def parse_notify(self, info, parts):
         """
         parse_notify(info, parts) -> None
@@ -87,21 +88,42 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         Take the text and try to send it to the specified user.
         """
         
-        #Divide the people and the message into two parts.
-        receiver = parts[1]
-        notification = " ".join(parts[2:])
-        
-        #No receiver or no message
-        if receiver[0] != "@" or len(notification) == 0:
-            return
-        
-        #Send the message to the receiver
-        to = receiver[1:]
-        to = filter_nick(to)
-        self.messages.add_notification(to, info["sender"]["name"], notification, 
-                                int(info["time"]))
-        self.send_chat("Message will be delivered to %s." % receiver, 
-                        info["id"])
+        if len(parts) >= 2:
+            #Divide the people and the message into two parts.
+            tp = parts[0][0]
+            receiver = parts[0][1:]
+            notification = " ".join(parts[1:])
+
+            if tp == "@":  #Normal notification
+                self.messages.add_notification(filter_nick(receiver), info["sender"]["name"], 
+                                            notification, int(info["time"]))
+            elif tp == "*":  #Group notification
+                group = filter_nick(receiver)
+                if group in self.groups:
+                    for p in self.groups[group]:
+                        self.messages.add_notification(filter_nick(p), info["sender"]["name"], notification, 
+                                            int(info["time"]))
+            else:
+                return
+
+            self.send_chat("Message will be delivered to %s." % (tp + receiver), 
+                            info["id"])
+    
+    def parse_group(self, info, parts):
+        if len(parts) == 2 and parts[0][0] == "*" and parts[1][0] == "@":
+            group = parts[0][1:]
+            user = parts[1][1:]
+            if group not in self.groups:
+                #Create the group if it does not exist
+                self.groups[group] = []
+
+            if user in self.groups[group]:
+                #Already in group
+                self.send_chat("%s is already in group %s." % ("@" + user, "*" + group), info["id"])
+            else:
+                #Add that person to the group
+                self.groups[group].append(filter_nick(user))
+                self.send_chat("Added %s to group %s." % ("@" + user, "*" + group), info["id"])
 
     def handle_chat(self, info):
         #Handle sending messages if the user speaks
@@ -130,7 +152,11 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         
         #Handle a notification request.
         elif command == "!notify":
-            self.parse_notify(info, parts)
+            self.parse_notify(info, parts[1:])
+            
+        #Handle a request to create a group
+        elif command == "!group":
+            self.parse_group(info, parts[1:])
             
     def quit(self):
         self.threadstop = True

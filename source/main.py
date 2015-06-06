@@ -9,7 +9,7 @@ rooms = {"xkcd": None,
          "music": None}
 
 def main():
-    notifiers = multiroom.MultiRoom(rooms)
+    notifiers = multiroom.MultiRoom({"testing": None})
     
     eu.executable.start(notifiers)
 
