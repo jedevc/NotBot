@@ -109,7 +109,13 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             self.send_chat("Message will be delivered to %s." % (tp + receiver), 
                             info["id"])
     
-    def parse_group(self, info, parts):
+    def parse_group(self, info, parts, add=True):
+        """
+        parse_group(info, parts) -> None
+        
+        Take the text and try to add someone to a group.
+        """
+        
         if len(parts) == 2 and parts[0][0] == "*" and parts[1][0] == "@":
             group = parts[0][1:]
             user = parts[1][1:]
@@ -117,13 +123,22 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
                 #Create the group if it does not exist
                 self.groups[group] = []
 
-            if user in self.groups[group]:
-                #Already in group
-                self.send_chat("%s is already in group %s." % ("@" + user, "*" + group), info["id"])
+            if filter_nick(user) in self.groups[group]:
+                if add:
+                    #Already in group
+                    self.send_chat("%s is already in group %s." % ("@" + user, "*" + group), info["id"])
+                else:
+                    #Remove from group
+                    self.groups[group].remove(filter_nick(user))
+                    self.send_chat("%s has been removed from group %s." % ("@" + user, "*" + group), info["id"])
             else:
-                #Add that person to the group
-                self.groups[group].append(filter_nick(user))
-                self.send_chat("Added %s to group %s." % ("@" + user, "*" + group), info["id"])
+                if add:
+                    #Add that person to the group
+                    self.groups[group].append(filter_nick(user))
+                    self.send_chat("Added %s to group %s." % ("@" + user, "*" + group), info["id"])
+                else:
+                    #Person is not in group
+                    self.send_chat("%s is not in group %s." % ("@" + user, "*" + group), info["id"])
 
     def handle_chat(self, info):
         #Handle sending messages if the user speaks
@@ -156,7 +171,10 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             
         #Handle a request to create a group
         elif command == "!group":
-            self.parse_group(info, parts[1:])
+            self.parse_group(info, parts[1:], add=True)
+            
+        elif command == "!ungroup":
+            self.parse_group(info, parts[1:], add=False)
             
     def quit(self):
         self.threadstop = True
