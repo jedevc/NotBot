@@ -1,48 +1,16 @@
 import euphoria
 
 import time
-import unicodedata
 import threading
 
-def filter_nick(name):
-    """
-    filter_nick(name) -> String
-
-    Process the name and get rid of all whitespace, invisible characters and
-    make it all lower case.
-    """
-
-    ret = "".join(c for c in name if unicodedata.category(c)[0] not in ["C", "Z"])
-
-    ret = "".join(ret.split())
-    ret = ret.lower()
-
-    return ret
-
-def extract_time(seconds):
-    """
-    extract_time(seconds) -> String
-
-    Turn the time in seconds to a string containing the time formatted into
-    hours and minutes.
-    """
-
-    m, s = divmod(seconds, 60)
-    h, m = divmod(m, 60)
-
-    if (h == 0 and m == 0):
-        return "%ds" % s
-    elif (h == 0):
-        return "%dm %ds" % (m, s)
-    else:
-        return "%dh %dm %ds" % (h, m, s)
+import utilities as ut
 
 class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
-    def __init__(self, messages, dumpdelay, roomname, password=None):
+    def __init__(self, messages, groups, dumpdelay, roomname, password=None):
         super().__init__(roomname, password)
         self.nickname = "NotBot"
 
-        self.groups = dict()
+        self.groups = groups
         self.messages = messages
 
         #Threading crap
@@ -62,6 +30,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         while not self.threadstop:
             if time.time() - last_dump > delay:
                 self.messages.dump_notifications()
+                self.groups.dump_groups()
                 last_dump = time.time()
 
             time.sleep(3)  #Calm CPU usage
@@ -77,7 +46,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
 
         for message in messages:
             user, content, timestamp = message
-            tosend = "[" + user + ", " + extract_time(int(time.time()) -
+            tosend = "[" + user + ", " + ut.extract_time(int(time.time()) -
                         timestamp) + " ago] " + content
             self.send_chat(tosend, info["id"])
 
@@ -95,13 +64,12 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             notification = " ".join(parts[1:])
 
             if tp == "@":  #Normal notification
-                self.messages.add_notification(filter_nick(receiver), info["sender"]["name"],
+                self.messages.add_notification(ut.filter_nick(receiver), info["sender"]["name"],
                                             notification, int(info["time"]))
             elif tp == "*":  #Group notification
-                group = filter_nick(receiver)
-                if group in self.groups:
-                    for p in self.groups[group]:
-                        self.messages.add_notification(filter_nick(p), info["sender"]["name"], notification,
+                group = ut.filter_nick(receiver)
+                for p in self.groups.get_users(group):
+                    self.messages.add_notification(ut.filter_nick(p), info["sender"]["name"], notification,
                                             int(info["time"]))
             else:
                 return
@@ -119,30 +87,15 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         if len(parts) == 2 and parts[0][0] == "*" and parts[1][0] == "@":
             group = parts[0][1:]
             user = parts[1][1:]
-            if group not in self.groups:
-                #Create the group if it does not exist
-                self.groups[group] = []
 
-            if filter_nick(user) in self.groups[group]:
-                if add:
-                    #Already in group
-                    self.send_chat("%s is already in group %s." % ("@" + user, "*" + group), info["id"])
-                else:
-                    #Remove from group
-                    self.groups[group].remove(filter_nick(user))
-                    self.send_chat("%s has been removed from group %s." % ("@" + user, "*" + group), info["id"])
+            if add:
+                self.send_chat(self.groups.add_to_group(user, group), info["id"])
             else:
-                if add:
-                    #Add that person to the group
-                    self.groups[group].append(filter_nick(user))
-                    self.send_chat("Added %s to group %s." % ("@" + user, "*" + group), info["id"])
-                else:
-                    #Person is not in group
-                    self.send_chat("%s is not in group %s." % ("@" + user, "*" + group), info["id"])
+                self.send_chat(self.groups.remove_from_group(user, group), info["id"])
 
     def handle_chat(self, info):
         #Handle sending messages if the user speaks
-        user = filter_nick(info["sender"]["name"])
+        user = ut.filter_nick(info["sender"]["name"])
         if self.messages.has_notifications(user):
             self.send_notifications(user, info)
 
