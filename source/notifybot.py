@@ -59,23 +59,12 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
 
         if len(parts) >= 2:
             #Divide the people and the message into two parts.
-            tp = parts[0][0]
-            receiver = parts[0][1:]
+            user = parts[0]
+            sender = info["sender"]["name"]
             notification = " ".join(parts[1:])
+            timestamp = info["time"]
 
-            if tp == "@":  #Normal notification
-                self.messages.add_notification(ut.filter_nick(receiver), info["sender"]["name"],
-                                            notification, int(info["time"]))
-            elif tp == "*":  #Group notification
-                group = ut.filter_nick(receiver)
-                for p in self.groups.get_users(group):
-                    self.messages.add_notification(ut.filter_nick(p), info["sender"]["name"], notification,
-                                            int(info["time"]))
-            else:
-                return
-
-            self.send_chat("Message will be delivered to %s." % (tp + receiver),
-                            info["id"])
+            self.send_chat(self.messages.add_notification(user, sender, notification, timestamp), info["id"])
 
     def parse_group(self, info, parts, add=True):
         """

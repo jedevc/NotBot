@@ -1,6 +1,10 @@
+import utilities as ut
+
 class NotificationManager:
-    def __init__(self, dumpfile):
+    def __init__(self, dumpfile, groups):
         self.messages = dict()
+
+        self.groups = groups
 
         self.filename = dumpfile
 
@@ -11,10 +15,22 @@ class NotificationManager:
         Add notification for a certain user.
         """
 
-        if user not in self.messages:
-            self.messages[user] = []
+        tp = user[0]
+        receiver = ut.filter_nick(user[1:])
 
-        self.messages[user].append((sender, message, timestamp))
+        if tp == "@":  #Normal notification
+            if receiver not in self.messages:
+                self.messages[receiver] = []
+            self.messages[receiver].append((sender, message, timestamp))
+        elif tp == "*":  #Group notification
+            for p in self.groups.get_users(receiver):
+                if p not in self.messages:
+                    self.messages[p] = []
+                self.messages[p].append((sender, message, timestamp))
+        else:
+            return "Invalid !notify syntax."
+
+        return "Message will be delivered to %s." % user
 
     def get_notifications(self, user):
         """
@@ -37,7 +53,10 @@ class NotificationManager:
         Tests if a user has some notifications waiting for them.
         """
 
-        return (user in self.messages)
+        if user in self.messages and self.messages[user] != []:
+            return True
+        else:
+            return False
 
     def dump_notifications(self):
         """

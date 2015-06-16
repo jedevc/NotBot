@@ -37,16 +37,13 @@ class GroupManager:
         Remove a user from the group.
         """
 
-        if group not in self.groups:
-            return
-
-        if ut.filter_nick(user) in self.groups[group]:
+        if group not in self.groups or ut.filter_nick(user) not in self.groups[group]:
+            #Person is not in group
+            return "%s is not in group %s." % ("@" + user, "*" + group)
+        else:
             #Remove from group
             self.groups[group].remove(ut.filter_nick(user))
             return "%s has been removed from group %s." % ("@" + user, "*" + group)
-        else:
-            #Person is not in group
-            return "%s is not in group %s." % ("@" + user, "*" + group)
 
     def dump_groups(self):
         """
