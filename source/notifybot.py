@@ -121,6 +121,19 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         elif command == "!ungroup":
             self.parse_group(info, parts[1:], add=False)
 
+        elif command == "!grouplist":
+            if len(parts) == 1:
+                gs = self.groups.get_groups()
+                if len(gs) != 0:
+                    gs = ["*" + g for g in gs]
+                    self.send_chat("\n".join(gs), info["id"])
+            elif len(parts) == 2:
+                if parts[1][0] == "*":
+                    us = self.groups.get_users(parts[1][1:])
+                    if len(us) != 0:
+                        us = ["@" + u for u in us]
+                        self.send_chat("\n".join(us), info["id"])
+
     def cleanup(self):
         self.threadstop = True
         self.dump_thread.join()

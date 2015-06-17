@@ -6,6 +6,9 @@ class GroupManager:
 
         self.filename = dumpfile
 
+    def get_groups(self):
+        return [g for g in self.groups]
+
     def get_users(self, group):
         if group in self.groups:
             return self.groups[group]
