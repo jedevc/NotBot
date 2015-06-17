@@ -8,25 +8,33 @@ class NotificationManager:
 
         self.filename = dumpfile
 
+    def create_notification(self, user, sender, message, timestamp):
+        """
+        create_notification(user, sender, message, timestamp) -> None
+        """
+
+        if user not in self.messages:
+            self.messages[user] = []
+
+        self.messages[user].append((sender, message, timestamp))
+
     def add_notification(self, user, sender, message, timestamp):
         """
         add_notification(user, sender, message, timestamp) -> None
 
-        Add notification for a certain user.
+        Add notification for a certain user or group.
         """
 
         tp = user[0]
         receiver = ut.filter_nick(user[1:])
 
         if tp == "@":  #Normal notification
-            if receiver not in self.messages:
-                self.messages[receiver] = []
-            self.messages[receiver].append((sender, message, timestamp))
+            self.create_notification(receiver, sender, message, timestamp)
         elif tp == "*":  #Group notification
             for p in self.groups.get_users(receiver):
                 if p not in self.messages:
                     self.messages[p] = []
-                self.messages[p].append((sender, message, timestamp))
+                self.create_notification(p, receiver, sender, message, timestamp)
         else:
             return "Invalid !notify syntax."
 
@@ -90,4 +98,6 @@ class NotificationManager:
             if len(n.strip()) != 0:
                 user, sender, message, timestamp = eval(n)
 
-                self.add_notification(user, sender, message, timestamp)
+                self.create_notification(user, sender, message, timestamp)
+
+        print(self.messages)

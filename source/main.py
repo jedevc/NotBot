@@ -6,11 +6,13 @@ import euphoria as eu
 rooms = {"xkcd": None,
          "bots": None,
          "test": None,
-         "music": None}
+         "music": None,
+         "blue": None,
+         "lenger": None}
 
 def main():
-    notifiers = multiroom.MultiRoom({"testing": None})
-    
+    notifiers = multiroom.MultiRoom(rooms)
+
     eu.executable.start(notifiers)
 
 if __name__ == "__main__":

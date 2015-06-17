@@ -13,6 +13,10 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         self.groups = groups
         self.messages = messages
 
+        self.helptxt = ""
+        with open("data/help.txt", 'r') as f:
+            self.helptxt = f.read()
+
         #Threading crap
         self.dump_thread = threading.Thread(target=self.regular_dump,
                                             args=[dumpdelay])
@@ -101,14 +105,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
 
         #Handle help
         elif command == "!help" and self.nickname in info["content"]:
-            self.send_chat("Use !notify to send messages to other people who "
-                            "are currently unavailable.\n"
-                            "Use !group and !ungroup to add yourself to a group "
-                            "that can send and receive messages just like a "
-                            "person.\n\n"
-                            "Want to have an instance of @NotBot in another "
-                            "room? Just send me (@jedevc) a !notify.",
-                            info["id"])
+            self.send_chat(self.helptxt, info["id"])
 
         #Handle a notification request.
         elif command == "!notify":
