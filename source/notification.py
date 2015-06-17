@@ -34,7 +34,7 @@ class NotificationManager:
             for p in self.groups.get_users(receiver):
                 if p not in self.messages:
                     self.messages[p] = []
-                self.create_notification(p, receiver, sender, message, timestamp)
+                self.create_notification(p, sender, message, timestamp)
         else:
             return
 
@@ -99,5 +99,3 @@ class NotificationManager:
                 user, sender, message, timestamp = eval(n)
 
                 self.create_notification(user, sender, message, timestamp)
-
-        print(self.messages)
