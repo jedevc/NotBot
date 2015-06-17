@@ -68,7 +68,10 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             notification = " ".join(parts[1:])
             timestamp = info["time"]
 
-            self.send_chat(self.messages.add_notification(user, sender, notification, timestamp), info["id"])
+            ret = self.messages.add_notification(user, sender, notification, timestamp)
+
+            if ret != None:
+                self.send_chat(ret, info["id"])
 
     def parse_group(self, info, parts, add=True):
         """

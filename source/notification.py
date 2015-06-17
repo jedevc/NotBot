@@ -36,7 +36,7 @@ class NotificationManager:
                     self.messages[p] = []
                 self.create_notification(p, receiver, sender, message, timestamp)
         else:
-            return "Invalid !notify syntax."
+            return
 
         return "Message will be delivered to %s." % user
 
