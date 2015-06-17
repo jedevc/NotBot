@@ -46,6 +46,9 @@ class GroupManager:
         else:
             #Remove from group
             self.groups[group].remove(ut.filter_nick(user))
+            if len(self.groups[group]) == 0:
+                self.groups.pop(group)
+
             return "%s has been removed from group %s." % ("@" + user, "*" + group)
 
     def dump_groups(self):
