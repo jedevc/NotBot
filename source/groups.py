@@ -1,10 +1,11 @@
 import utilities as ut
+import dumper
 
-class GroupManager:
+class GroupManager(dumper.Dumper):
     def __init__(self, dumpfile):
-        self.groups = dict()
+        super().__init__(dumpfile)
 
-        self.filename = dumpfile
+        self.groups = dict()
 
     def get_groups(self):
         return [g for g in self.groups]
@@ -52,33 +53,9 @@ class GroupManager:
             return "%s has been removed from group %s." % ("@" + user, "*" + group)
 
     def dump_groups(self):
-        """
-        dump_groups() -> None
-
-        Dump all the groups that exist in a file to be read in later.
-        """
-
-        with open(self.filename, 'w') as f:
-            for group in self.groups:
-                f.write(str((group, self.groups[group])) + "\n")
+        self.dump(self.groups)
 
     def recover_groups(self):
-        """
-        recover_notifications() -> None
-
-        Recover all the groups that you previously dumped in a file
-        """
-
-        groups = []
-        try:
-            with open(self.filename) as f:
-                groups = f.read().split('\n')
-        except FileNotFoundError:
-            return
-
-        for g in groups:
-            if len(g) != 0:
-                group, people = eval(g)
-
-                for p in people:
-                    self.add_to_group(p, group)
+        self.groups = self.recover()
+        if self.groups is None:
+            self.groups = dict()

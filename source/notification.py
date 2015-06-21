@@ -1,12 +1,13 @@
 import utilities as ut
+import dumper
 
-class NotificationManager:
+class NotificationManager(dumper.Dumper):
     def __init__(self, dumpfile, groups):
+        super().__init__(dumpfile)
+
         self.messages = dict()
 
         self.groups = groups
-
-        self.filename = dumpfile
 
     def create_notification(self, user, sender, message, timestamp):
         """
@@ -67,35 +68,9 @@ class NotificationManager:
             return False
 
     def dump_notifications(self):
-        """
-        dump_notifications() -> None
-
-        Dump all the messages you have obtained in a file to be read in later.
-        """
-
-        with open(self.filename, 'w') as f:
-            for user in self.messages:
-                for i in self.messages[user]:
-                    sender, message, timestamp = i
-
-                    f.write(str((user, sender, message, timestamp)) + "\n")
+        self.dump(self.messages)
 
     def recover_notifications(self):
-        """
-        recover_notifications() -> None
-
-        Recover all the messages that you previously dumped in a file
-        """
-
-        nots = []
-        try:
-            with open(self.filename) as f:
-                nots = f.read().split('\n')
-        except FileNotFoundError:
-            return
-
-        for n in nots:
-            if len(n.strip()) != 0:
-                user, sender, message, timestamp = eval(n)
-
-                self.create_notification(user, sender, message, timestamp)
+        self.messages = self.recover()
+        if self.messages is None:
+            self.messages = dict()
