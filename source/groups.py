@@ -10,7 +10,8 @@ class GroupManager(dumper.Dumper):
     def get_groups(self):
         return [g for g in self.groups]
 
-    def get_users(self, group):
+    def get_users(self, g):
+        group = ut.filter_nick(g)
         if group in self.groups:
             return self.groups[group]
         else:
