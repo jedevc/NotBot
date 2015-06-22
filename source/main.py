@@ -1,17 +1,16 @@
 #A bot that notifies people.
 
+import json
+
 import multiroom
 import euphoria as eu
 
-rooms = {"xkcd": None,
-         "bots": None,
-         "test": None,
-         "music": None,
-         "blue": None,
-         "lenger": None}
+rooms = dict()
+with open("data/rooms.json", 'r') as f:
+    rooms = json.loads(f.read())
 
 def main():
-    notifiers = multiroom.MultiRoom(rooms)
+    notifiers = multiroom.MultiRoom({"testing": None})
 
     eu.executable.start(notifiers)
 

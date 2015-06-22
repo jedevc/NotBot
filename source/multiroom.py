@@ -14,5 +14,5 @@ class MultiRoom(euphoria.execgroup.ExecGroup):
         notifies = notification.NotificationManager("message.txt", grouping)
         notifies.recover_notifications()
 
-        for i in rooms:
-            self.add(notifybot.NotifyBot(notifies, grouping, 60, i, rooms[i]))
+        for r in rooms:
+            self.add(notifybot.NotifyBot(notifies, grouping, 60, r, rooms[r]))

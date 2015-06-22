@@ -1,6 +1,8 @@
 import utilities as ut
 import dumper
 
+import time
+
 class NotificationManager(dumper.Dumper):
     def __init__(self, dumpfile, groups):
         super().__init__(dumpfile)
@@ -43,17 +45,24 @@ class NotificationManager(dumper.Dumper):
 
     def get_notifications(self, user):
         """
-        get_notifications(user) -> None
+        get_notifications(user) -> List
 
         Clear and return all messages for a certain user.
         """
 
+        messages = []
         if user in self.messages:
-            ms = self.messages[user]
+            messages = self.messages[user]
             self.messages[user] = []
-            return ms
 
-        return []
+        conmessages = []
+        for message in messages:
+            user, content, timestamp = message
+            cm = "[" + user + ", " + ut.extract_time(int(time.time()) -
+                            timestamp) + " ago] " + content
+            conmessages.append(cm)
+
+        return conmessages
 
     def has_notifications(self, user):
         """

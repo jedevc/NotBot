@@ -1,7 +1,7 @@
 import euphoria
 
-import time
 import threading
+import time
 
 import utilities as ut
 
@@ -16,6 +16,8 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         self.helptxt = ""
         with open("data/help.txt", 'r') as f:
             self.helptxt = f.read()
+
+        self.start_time = time.time()
 
         #Threading crap
         self.dump_thread = threading.Thread(target=self.regular_dump,
@@ -38,21 +40,6 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
                 last_dump = time.time()
 
             time.sleep(3)  #Calm CPU usage
-
-    def send_notifications(self, user, info):
-        """
-        send_notifications(user, info) -> None
-
-        Send all the messages queued by the bot.
-        """
-
-        messages = self.messages.get_notifications(user)
-
-        for message in messages:
-            user, content, timestamp = message
-            tosend = "[" + user + ", " + ut.extract_time(int(time.time()) -
-                        timestamp) + " ago] " + content
-            self.send_chat(tosend, info["id"])
 
     def parse_notify(self, info, parts):
         """
@@ -93,7 +80,9 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         #Handle sending messages if the user speaks
         user = ut.filter_nick(info["sender"]["name"])
         if self.messages.has_notifications(user):
-            self.send_notifications(user, info)
+            ms = self.messages.get_notifications(user)
+            for m in ms:
+                self.send_chat(m, info["id"])
 
         #Now, begin proccessing the message
         #Split the message into parts and work out the command
@@ -107,8 +96,11 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             self.send_chat("Pong!", info["id"])
 
         #Handle help
-        elif command == "!help" and self.nickname in info["content"]:
+        elif command == "!help" and "@" + self.nickname in parts:
             self.send_chat(self.helptxt, info["id"])
+
+        elif command == "!uptime" and "@" + self.nickname in parts:
+            self.send_chat("Been up for " + ut.extract_time(time.time() - self.start_time) + ".", info["id"])
 
         #Handle a notification request.
         elif command == "!notify":

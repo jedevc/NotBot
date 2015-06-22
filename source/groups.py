@@ -8,9 +8,21 @@ class GroupManager(dumper.Dumper):
         self.groups = dict()
 
     def get_groups(self):
+        """
+        get_groups() -> List
+
+        Get a list of all the groups.
+        """
+
         return [g for g in self.groups]
 
     def get_users(self, g):
+        """
+        get_users(g) -> List
+
+        Get all the users who are in a certain group.
+        """
+
         group = ut.filter_nick(g)
         if group in self.groups:
             return self.groups[group]
