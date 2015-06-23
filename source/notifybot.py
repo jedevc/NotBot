@@ -99,6 +99,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         elif command == "!help" and "@" + self.nickname in parts:
             self.send_chat(self.helptxt, info["id"])
 
+        #Handle uptime
         elif command == "!uptime" and "@" + self.nickname in parts:
             self.send_chat("Been up for " + ut.extract_time(time.time() - self.start_time) + ".", info["id"])
 
@@ -106,7 +107,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         elif command == "!notify":
             self.parse_notify(info, parts[1:])
 
-        #Handle a request to create a group
+        #Handle a request to create/destroy a group
         elif command == "!group":
             self.parse_group(info, parts[1:], add=True)
 

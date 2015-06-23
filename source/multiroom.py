@@ -8,10 +8,10 @@ class MultiRoom(euphoria.execgroup.ExecGroup):
     def __init__(self, rooms):
         super().__init__()
 
-        grouping = groups.GroupManager("group.txt")
+        grouping = groups.GroupManager("group.json")
         grouping.recover_groups()
 
-        notifies = notification.NotificationManager("message.txt", grouping)
+        notifies = notification.NotificationManager("message.json", grouping)
         notifies.recover_notifications()
 
         for r in rooms:
