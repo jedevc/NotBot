@@ -10,7 +10,7 @@ with open("data/rooms.json", 'r') as f:
     rooms = json.loads(f.read())
 
 def main():
-    notifiers = multiroom.MultiRoom(rooms)
+    notifiers = multiroom.MultiRoom({"testing": None})
 
     eu.executable.start(notifiers)
 

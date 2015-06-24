@@ -29,12 +29,12 @@ class NotificationManager(dumper.Dumper):
         """
 
         tp = user[0]
-        receiver = ut.filter_nick(user[1:])
+        receiver = user[1:]
 
         if tp == "@":  #Normal notification
-            self.create_notification(receiver, sender, message, timestamp)
+            self.create_notification(ut.filter_nick(receiver), sender, message, timestamp)
         elif tp == "*":  #Group notification
-            for p in self.groups.get_users(receiver):
+            for p in self.groups.get_filtered_users(receiver):
                 if p not in self.messages:
                     self.messages[p] = []
                 self.create_notification(p, sender, message, timestamp)
