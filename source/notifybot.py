@@ -10,8 +10,8 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
         super().__init__(roomname, password)
         self.nickname = "NotBot"
 
-        self.groups = groups
         self.messages = messages
+        self.groups = groups
 
         self.helptxt = ""
         with open("data/help.txt", 'r') as f:
@@ -91,29 +91,31 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             return
         command = parts[0]
 
-        #Handle ping
+        #Pong!
         if command == "!ping":
             self.send_chat("Pong!", info["id"])
 
-        #Handle help
+        #Print the help text
         elif command == "!help" and "@" + self.nickname in parts:
             self.send_chat(self.helptxt, info["id"])
 
-        #Handle uptime
+        #Get the uptime
         elif command == "!uptime" and "@" + self.nickname in parts:
             self.send_chat("Been up for " + ut.extract_time(time.time() - self.start_time) + ".", info["id"])
 
-        #Handle a notification request.
+        #!notify someone
         elif command == "!notify":
             self.parse_notify(info, parts[1:])
 
-        #Handle a request to create/destroy a group
+        #Create a group
         elif command == "!group":
             self.parse_group(info, parts[1:], add=True)
 
+        #Remove someone from a group
         elif command == "!ungroup":
             self.parse_group(info, parts[1:], add=False)
 
+        #Get a list of all the groups
         elif command == "!grouplist":
             if len(parts) == 1:
                 gs = self.groups.get_groups()

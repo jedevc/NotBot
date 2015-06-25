@@ -2,6 +2,7 @@ import euphoria
 
 import notification
 import groups
+
 import notifybot
 
 class MultiRoom(euphoria.execgroup.ExecGroup):
