@@ -11,15 +11,15 @@ class NotificationManager(dumper.Dumper):
 
         self.groups = groups
 
-    def create_notification(self, user, sender, message, timestamp):
+    def create_notification(self, user, to, sender, message, timestamp):
         """
-        create_notification(user, sender, message, timestamp) -> None
+        create_notification(user, to, sender, message, timestamp) -> None
         """
 
         if user not in self.messages:
             self.messages[user] = []
 
-        self.messages[user].append((sender, message, timestamp))
+        self.messages[user].append((to, sender, message, timestamp))
 
     def add_notification(self, user, sender, message, timestamp):
         """
@@ -32,12 +32,12 @@ class NotificationManager(dumper.Dumper):
         receiver = user[1:]
 
         if tp == "@":  #Normal notification
-            self.create_notification(ut.filter_nick(receiver), sender, message, timestamp)
+            self.create_notification(ut.filter_nick(receiver), user, sender, message, timestamp)
         elif tp == "*":  #Group notification
             for p in self.groups.get_filtered_users(receiver):
                 if p not in self.messages:
                     self.messages[p] = []
-                self.create_notification(p, sender, message, timestamp)
+                self.create_notification(p, user, sender, message, timestamp)
         else:
             return
 
@@ -57,9 +57,9 @@ class NotificationManager(dumper.Dumper):
 
         conmessages = []
         for message in messages:
-            user, content, timestamp = message
-            cm = "[" + user + ", " + ut.extract_time(int(time.time()) -
-                            timestamp) + " ago] " + content
+            to, sender, content, timestamp = message
+            cm = "[" + sender + ", " + ut.extract_time(int(time.time()) -
+                            timestamp) + " ago] <" + to + ">: " + content
             conmessages.append(cm)
 
         return conmessages
