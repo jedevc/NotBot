@@ -35,9 +35,10 @@ class NotificationManager(dumper.Dumper):
             self.create_notification(ut.filter_nick(receiver), user, sender, message, timestamp)
         elif tp == "*":  #Group notification
             for p in self.groups.get_filtered_users(receiver):
-                if p not in self.messages:
-                    self.messages[p] = []
-                self.create_notification(p, user, sender, message, timestamp)
+                if p != ut.filter_nick(sender):
+                    if p not in self.messages:
+                        self.messages[p] = []
+                    self.create_notification(p, user, sender, message, timestamp)
         else:
             return
 
