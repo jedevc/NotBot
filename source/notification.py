@@ -32,6 +32,8 @@ class NotificationManager(dumper.Dumper):
         receiver = user[1:]
 
         if tp == "@":  #Normal notification
+            if receiver == "NotBot":
+                return "No. Won't do that for you. Sorry."
             self.create_notification(ut.filter_nick(receiver), user, sender, message, timestamp)
         elif tp == "*":  #Group notification
             for p in self.groups.get_filtered_users(receiver):
