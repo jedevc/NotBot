@@ -1,12 +1,11 @@
 import euphoria
 
-import threading
-import time
-
 import utilities as ut
 
+import time
+
 class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
-    def __init__(self, messages, groups, dumpdelay, roomname, password=None):
+    def __init__(self, messages, groups, roomname, password=None):
         super().__init__(roomname, password)
         self.nickname = "NotBot"
 
@@ -18,28 +17,6 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             self.helptxt = f.read()
 
         self.start_time = time.time()
-
-        #Threading crap
-        self.dump_thread = threading.Thread(target=self.regular_dump,
-                                            args=[dumpdelay])
-        self.threadstop = False
-        self.dump_thread.start()
-
-    def regular_dump(self, delay):
-        """
-        regular_dump(delay) -> None
-
-        Regularly dump to a file so that messages can be recovered if needed.
-        """
-
-        last_dump = time.time()
-        while not self.threadstop:
-            if time.time() - last_dump > delay:
-                self.messages.dump_notifications()
-                self.groups.dump_groups()
-                last_dump = time.time()
-
-            time.sleep(3)  #Calm CPU usage
 
     def parse_notify(self, info, parts):
         """
@@ -128,7 +105,3 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
                     if len(us) != 0:
                         us = ["@" + u for u in us]
                         self.send_chat("\n".join(us), info["id"])
-
-    def cleanup(self):
-        self.threadstop = True
-        self.dump_thread.join()
