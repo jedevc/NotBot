@@ -1,6 +1,6 @@
 import euphoria
 
-import utilities as ut
+import euphoria.utils as ut
 
 import time
 

@@ -1,4 +1,4 @@
-import utilities as ut
+import euphoria.utils as ut
 import dumper
 
 class GroupManager(dumper.Dumper):
