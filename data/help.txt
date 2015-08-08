@@ -1,3 +1,5 @@
+Send messages!
+
 Use !notify to send messages to other people who are currently unavailable.
                 !notify @PERSON MESSAGE
 Use !group and !ungroup to add yourself to a group that can send and receive messages just like a person.
@@ -7,7 +9,4 @@ Use !grouplist to see all the groups and to see their occupants.
                 !grouplist
                 !grouplist *GROUP
 
-@NotBot also responds to these basic commands.
-                !ping
-                !help @NotBot
-                !uptime @NotBot
+@NotBot also obeys the euphorian bot standards.

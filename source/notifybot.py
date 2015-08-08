@@ -4,17 +4,17 @@ import utilities as ut
 
 import time
 
-class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
+class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom):
     def __init__(self, messages, groups, roomname, password=None):
         super().__init__(roomname, password)
         self.nickname = "NotBot"
+        self.help_text = ""
+        with open("data/help.txt", 'r') as f:
+            self.help_text = f.read()
+        self.short_help_text = self.help_text.split('\n')[0]
 
         self.messages = messages
         self.groups = groups
-
-        self.helptxt = ""
-        with open("data/help.txt", 'r') as f:
-            self.helptxt = f.read()
 
         self.start_time = time.time()
 
@@ -68,20 +68,8 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.chat_room.ChatRoom):
             return
         command = parts[0]
 
-        #Pong!
-        if command == "!ping":
-            self.send_chat("Pong!", info["id"])
-
-        #Print the help text
-        elif command == "!help" and "@" + self.nickname in parts:
-            self.send_chat(self.helptxt, info["id"])
-
-        #Get the uptime
-        elif command == "!uptime" and "@" + self.nickname in parts:
-            self.send_chat("Been up for " + ut.extract_time(time.time() - self.start_time) + ".", info["id"])
-
         #!notify someone
-        elif command == "!notify":
+        if command == "!notify":
             self.parse_notify(info, parts[1:])
 
         #Create a group
