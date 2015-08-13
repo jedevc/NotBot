@@ -20,30 +20,20 @@ class MultiRoom(euphoria.execgroup.ExecGroup):
         for r in rooms:
             self.add(notifybot.NotifyBot(self.notifies, self.grouping, r, rooms[r]))
 
-        #Threading crap
-        self.dump_thread = threading.Thread(target=self.regular_dump,
-                                            args=[dumpdelay])
-        self.threadstop = False
+        self.dumper = euphoria.utils.ForeverCall(self.dump_all, dumpdelay)
+        self.dumper.launch()
 
-    def ready(self):
-        self.dump_thread.start()
-
-    def regular_dump(self, delay):
+    def dump_all(self):
         """
-        regular_dump(delay) -> None
+        regular_dump() -> None
 
         Regularly dump to a file so that messages can be recovered if needed.
         """
 
-        last_dump = time.time()
-        while not self.threadstop:
-            if time.time() - last_dump > delay:
-                self.grouping.dump_groups()
-                self.notifies.dump_notifications()
-                last_dump = time.time()
+        self.grouping.dump_groups()
+        self.notifies.dump_notifications()
 
-            time.sleep(3)  #Calm CPU usage
+    def quit(self):
+        super().quit()
 
-    def cleanup(self):
-        self.threadstop = True
-        self.dump_thread.join()
+        self.dumper.quit()
