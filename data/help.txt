@@ -1,8 +1,9 @@
 Use !notify to send messages to other people who are currently unavailable.
                 !notify @PERSON MESSAGE
-Use !group and !ungroup to add yourself to a group that can send and receive messages just like a person.
-                !group *GROUP @PERSON
-                !ungroup *GROUP @PERSON
+                !notify *GROUP MESSAGE
+Use !group and !ungroup to add yourself (or anyone else) to a group that can send and receive messages just like a person.
+                !group *GROUP @PERSON [@PERSON2 [...]]
+                !ungroup *GROUP @PERSON [@PERSON2 [...]]
 Use !grouplist to see all the groups and to see their occupants.
                 !grouplist
                 !grouplist *GROUP
