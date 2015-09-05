@@ -31,6 +31,8 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
             for p in parts:
                 if p[0] == '@':
                     users.append(p)
+                else:
+                    break
 
             sender = info["sender"]["name"]
             notification = " ".join(parts[len(users):])
