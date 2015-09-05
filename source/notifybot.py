@@ -44,14 +44,22 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
         Take the text and try to add someone to a group.
         """
 
-        if len(parts) == 2 and parts[0][0] == "*" and parts[1][0] == "@":
-            group = parts[0][1:]
-            user = parts[1][1:]
+        if len(parts) >= 2 and parts[0][0] == "*":
 
-            if add:
-                self.send_chat(self.groups.add_to_group(user, group), info["id"])
-            else:
-                self.send_chat(self.groups.remove_from_group(user, group), info["id"])
+            # Check for non-users.
+            for p in parts[1:]:
+                if p[0] != "@":
+                    return
+
+            group = parts[0][1:]
+
+            for entry in parts[1:]:
+                user = entry[1:]
+
+                if add:
+                    self.send_chat(self.groups.add_to_group(user, group), info["id"])
+                else:
+                    self.send_chat(self.groups.remove_from_group(user, group), info["id"])
 
     def handle_chat(self, info):
         #Handle sending messages if the user speaks
