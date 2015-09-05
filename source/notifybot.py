@@ -27,15 +27,17 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
 
         if len(parts) >= 2:
             #Divide the people and the message into two parts.
-            user = parts[0]
+            users = []
+            for p in parts:
+                if p[0] == '@':
+                    users.append(p)
+
             sender = info["sender"]["name"]
-            notification = " ".join(parts[1:])
+            notification = " ".join(parts[len(users):])
             timestamp = info["time"]
 
-            ret = self.messages.add_notification(user, sender, notification, timestamp)
-
-            if ret != None:
-                self.send_chat(ret, info["id"])
+            for user in users:
+                self.send_chat(self.messages.add_notification(user, sender, notification, timestamp), info["id"])
 
     def parse_group(self, info, parts, add=True):
         """
@@ -45,7 +47,6 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
         """
 
         if len(parts) >= 2 and parts[0][0] == "*":
-
             # Check for non-users.
             for p in parts[1:]:
                 if p[0] != "@":
