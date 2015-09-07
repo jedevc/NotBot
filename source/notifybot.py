@@ -29,7 +29,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
             #Divide the people and the message into two parts.
             users = []
             for p in parts:
-                if p[0] == '@':
+                if p[0] == '@' or p[0] == '*':
                     users.append(p)
                 else:
                     break
