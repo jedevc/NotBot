@@ -25,15 +25,15 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
         Take the text and try to send it to the specified user.
         """
 
-        if len(parts) >= 2:
-            #Divide the people and the message into two parts.
-            users = []
-            for p in parts:
-                if p[0] == '@' or p[0] == '*':
-                    users.append(p)
-                else:
-                    break
+        #Divide the people and the message into two parts.
+        users = []
+        for p in parts:
+            if p[0] == '@' or p[0] == '*':
+                users.append(p)
+            else:
+                break
 
+        if len(users) != 0 and len(users) != len(parts):
             sender = info["sender"]["name"]
             notification = " ".join(parts[len(users):])
             timestamp = info["time"]
