@@ -20,7 +20,7 @@ class MultiRoom(euphoria.execgroup.ExecGroup):
         for r in rooms:
             self.add(notifybot.NotifyBot(self.notifies, self.grouping, r, rooms[r]))
 
-        self.dumper = euphoria.utils.ForeverCall(self.dump_all, dumpdelay)
+        self.dumper = euphoria.forever.ForeverCall(self.dump_all, dumpdelay)
         self.dumper.launch()
 
     def dump_all(self):
