@@ -102,5 +102,4 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
                 if parts[1][0] == "*":
                     us = self.groups.get_users(parts[1][1:])
                     if len(us) != 0:
-                        us = ["@" + u for u in us]
                         self.send_chat("\n".join(us), info["id"])
