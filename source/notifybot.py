@@ -100,4 +100,6 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
                 if cmd.args[0][0] == "*":
                     us = self.groups.get_users(cmd.args[0][1:])
                     if len(us) != 0:
+                        if "ping" in cmd.flags:
+                            us = ['@' + u for u in us]
                         self.send_chat("\n".join(us), info["id"])

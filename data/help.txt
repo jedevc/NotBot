@@ -6,6 +6,6 @@ Use !group and !ungroup to add yourself (or anyone else) to a group that can sen
                 !ungroup *GROUP @PERSON (@PERSON2, @PERSON3...)
 Use !grouplist to see all the groups and to see their occupants.
                 !grouplist
-                !grouplist *GROUP
+                !grouplist (-ping) *GROUP
 
 @NotBot also obeys the euphorian bot standards.
