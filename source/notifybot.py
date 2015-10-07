@@ -71,35 +71,33 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
             ms = self.messages.get_notifications(user)
             for m in ms:
                 self.send_chat(m, info["id"])
-
+                
         #Now, begin proccessing the message
         #Split the message into parts and work out the command
-        parts = info["content"].split()
-        if len(parts) == 0:
-            return
-        command = parts[0]
+        cmd = euphoria.command.Command(info["content"])
+        cmd.parse()
 
         #!notify someone
-        if command == "!notify":
-            self.parse_notify(info, parts[1:])
+        if cmd.command == "notify":
+            self.parse_notify(info, cmd.args)
 
         #Create a group
-        elif command == "!group":
-            self.parse_group(info, parts[1:], add=True)
+        elif cmd.command == "group":
+            self.parse_group(info, cmd.args, add=True)
 
         #Remove someone from a group
-        elif command == "!ungroup":
-            self.parse_group(info, parts[1:], add=False)
+        elif cmd.command == "ungroup":
+            self.parse_group(info, cmd.args, add=False)
 
         #Get a list of all the groups
-        elif command == "!grouplist":
-            if len(parts) == 1:
+        elif cmd.command == "grouplist":
+            if len(cmd.args) == 0:
                 gs = self.groups.get_groups()
                 if len(gs) != 0:
                     gs = ["*" + g for g in gs]
                     self.send_chat("\n".join(gs), info["id"])
-            elif len(parts) == 2:
-                if parts[1][0] == "*":
-                    us = self.groups.get_users(parts[1][1:])
+            elif len(cmd.args) == 1:
+                if cmd.args[0][0] == "*":
+                    us = self.groups.get_users(cmd.args[0][1:])
                     if len(us) != 0:
                         self.send_chat("\n".join(us), info["id"])
