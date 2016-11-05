@@ -4,7 +4,7 @@ import euphoria.utils as ut
 
 import time
 
-class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom):
+class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom, euphoria.nick_room.NickRoom):
     def __init__(self, messages, groups, roomname, password=None):
         super().__init__(roomname, password)
         self.nickname = "NotBot"
@@ -103,3 +103,7 @@ class NotifyBot(euphoria.ping_room.PingRoom, euphoria.standard_room.StandardRoom
                         if "ping" in cmd.flags:
                             us = ['@' + u for u in us]
                         self.send_chat("\n".join(us), info["id"])
+
+        #command to address bot ghosting issues (where bot is present but not shown on nicklist)
+        elif cmd.command == "antighost":
+            self.change_nick(self.nickname)
