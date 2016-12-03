@@ -1,4 +1,3 @@
-import string
 import euphoria.utils as ut
 import dumper
 
@@ -15,7 +14,7 @@ class GroupManager(dumper.Dumper):
         Get a list of all the groups.
         """
 
-        return list(sorted(self.groups, key=string.lower))
+        return list(sorted(self.groups, key=str.lower))
 
     def get_users(self, group):
         """
